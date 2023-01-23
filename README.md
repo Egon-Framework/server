@@ -1,3 +1,3 @@
 # Egon Server
 
-This repository is currently a scratch workspace for building out experimental ideas.
+The egon server is responsible for managing the database used by Egon on distributed systems.
