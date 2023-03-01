@@ -16,9 +16,7 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-egon-server = "egon_server.cli:Application.execute"
+egon-server = "egon_server.__main__:main"
 
 [tool.poetry.dependencies]
-flask = "*"
-flask_restful = "*"
-pydantic = "*"
+python = "3.11"
