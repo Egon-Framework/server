@@ -1,11 +1,9 @@
-"""The ``cli`` module defines the application's command line interface.
-It is responsible for parsing command line arguments and using the resulting
-values to configure and launch the parent application.
-"""
+"""The ``cli`` module defines the application's command line interface."""
 
 from argparse import ArgumentParser
 
 from . import __version__
+from .api import api
 
 
 class Parser(ArgumentParser):
@@ -20,6 +18,13 @@ class Parser(ArgumentParser):
 
         super().__init__(*args, **kwargs)
         self.add_argument('--version', action='version', version=__version__)
+        self.subparsers = self.add_subparsers(parser_class=ArgumentParser, required=True)
+
+        run = self.subparsers.add_parser('run')
+        run.set_defaults(action=Application.run_api)
+        run.add_argument('--host', type=str, default='localhost', help='the hostname to listen on')
+        run.add_argument('--port', type=int, default=5000, help='the port of the webserver')
+        run.add_argument('--debug', action='store_true', default=False, help='enable debug mode (insecure)')
 
 
 class Application:
@@ -33,8 +38,21 @@ class Application:
             description='Administrative utility for the Egon backend server'
         )
 
-    def execute(self):
+    @staticmethod
+    def run_api(host, port, debug: bool = False) -> None:
+        """Run the application
+
+        Args:
+            host: the hostname to listen on
+            port: the port of the webserver
+            debug: Enable or disable debug mode
+        """
+
+        api.run(host=host, port=port, debug=debug, load_dotenv=False)
+
+    def execute(self) -> None:
         """Parse arguments and run the application"""
 
-        args = self.parser.parse_args()
-        print('Hello World')
+        args = vars(self.parser.parse_args())
+        action = args.pop('action')
+        action(**args)
