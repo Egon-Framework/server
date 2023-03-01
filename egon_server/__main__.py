@@ -1,6 +1,4 @@
-"""The ``__main__`` module acts as the primary entrypoint for running
-the parent application from the command line.
-"""
+"""The primary entrypoint for running the parent application."""
 
 from .cli import Application
 

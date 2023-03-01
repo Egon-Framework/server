@@ -1,9 +1,9 @@
-"""The ``cli`` module defines the application's command line interface."""
+"""The application's command line interface."""
 
 from argparse import ArgumentParser
 
 from . import __version__
-from .api import api
+from .api import flask_app
 
 
 class Parser(ArgumentParser):
@@ -48,7 +48,7 @@ class Application:
             debug: Enable or disable debug mode
         """
 
-        api.run(host=host, port=port, debug=debug, load_dotenv=False)
+        flask_app.run(host=host, port=port, debug=debug, load_dotenv=False)
 
     def execute(self) -> None:
         """Parse arguments and run the application"""
