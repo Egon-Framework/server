@@ -30,10 +30,10 @@ class Parser(ArgumentParser):
         migrate = self.subparsers.add_parser('migrate')
         migrate.set_defaults(action=Application.migrate_db)
 
-        run = self.subparsers.add_parser('run')
-        run.set_defaults(action=Application.run_api)
-        run.add_argument('--host', type=str, default=DEFAULT_HOST, help='the hostname to listen on')
-        run.add_argument('--port', type=int, default=DEFAULT_PORT, help='the port of the webserver')
+        serve = self.subparsers.add_parser('serve')
+        serve.set_defaults(action=Application.serve_api)
+        serve.add_argument('--host', type=str, default=DEFAULT_HOST, help='the hostname to listen on')
+        serve.add_argument('--port', type=int, default=DEFAULT_PORT, help='the port of the webserver')
 
 
 class Application:
@@ -58,7 +58,7 @@ class Application:
             alembic.upgrade(target=__db_version__)
 
     @staticmethod
-    def run_api(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+    def serve_api(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
         """Run the application
 
         Args:
