@@ -2,8 +2,11 @@
 
 from argparse import ArgumentParser
 
+from flask_alembic import Alembic
+
 from . import __version__
 from .api import flask_app
+from .orm import __db_version__, db
 
 
 class Parser(ArgumentParser):
@@ -20,6 +23,9 @@ class Parser(ArgumentParser):
         self.add_argument('--version', action='version', version=__version__)
         self.subparsers = self.add_subparsers(parser_class=ArgumentParser, required=True)
 
+        migrate = self.subparsers.add_parser('migrate')
+        migrate.set_defaults(action=Application.migrate_db)
+
         run = self.subparsers.add_parser('run')
         run.set_defaults(action=Application.run_api)
         run.add_argument('--host', type=str, default='localhost', help='the hostname to listen on')
@@ -33,10 +39,20 @@ class Application:
     def __init__(self):
         """Initialize the application"""
 
-        self.parser = Parser(
-            prog='egon-server',
-            description='Administrative utility for the Egon backend server'
-        )
+        # This is temporary until the settings module is written
+        flask_app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///temp.db"
+        db.init_app(flask_app)
+
+    @staticmethod
+    def migrate_db() -> None:
+        """Migrate the application database to the current schema
+
+        If the database does not exist, it is created.
+        """
+
+        with flask_app.app_context():
+            alembic = Alembic(flask_app)
+            alembic.upgrade(target=__db_version__)
 
     @staticmethod
     def run_api(host, port, debug: bool = False) -> None:
@@ -48,11 +64,16 @@ class Application:
             debug: Enable or disable debug mode
         """
 
+        Application.migrate_db()
         flask_app.run(host=host, port=port, debug=debug, load_dotenv=False)
 
     def execute(self) -> None:
         """Parse arguments and run the application"""
 
-        args = vars(self.parser.parse_args())
+        parser = Parser(
+            prog='egon-server',
+            description='Administrative utility for the Egon backend server')
+
+        args = vars(parser.parse_args())
         action = args.pop('action')
         action(**args)
