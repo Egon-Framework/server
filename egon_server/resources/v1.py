@@ -6,15 +6,6 @@ from flask_restful import Resource
 __api_version__ = '1.0'
 
 
-class Health(Resource):
-    """Resource for checking API health"""
-
-    def get(self) -> Response:
-        """Handle an incoming GET request"""
-
-        return Response(status=200)
-
-
 class Version(Resource):
     """Resource for checking the API version"""
 
