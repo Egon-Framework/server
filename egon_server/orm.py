@@ -13,7 +13,8 @@ class Pipeline(db.Model):
     """Metadata for a running pipeline
 
     Table Fields:
-      - id         (db.Integer): Primary key for this table
+      - id         (Integer): Primary key for this table
+      - egon_id        (str): Unique pipeline ID used by Egon
       - name        (String): Human readable pipeline name
       - description (String): Description of the pipeline function
     """
@@ -21,6 +22,7 @@ class Pipeline(db.Model):
     __tablename__ = 'pipeline'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    pipeline_id = db.Column(db.String, nullable=False, unique=True)
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=True)
 
@@ -30,7 +32,8 @@ class Node(db.Model):
     """Metadata for a pipeline node
 
     Table Fields:
-      - id         (db.Integer): Primary key for this table
+      - id         (Integer): Primary key for this table
+      - egon_id        (str): Unique Node ID used by Egon
       - name        (String): Human readable node name
       - description (String): Description of the node's function
     """
@@ -38,5 +41,6 @@ class Node(db.Model):
     __tablename__ = 'node'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    egon_id = db.Column(db.String, nullable=False, unique=True)
     name = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=True)
