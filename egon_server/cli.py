@@ -1,16 +1,20 @@
-"""The application's command line interface."""
+"""The application command line interface."""
 
 from argparse import ArgumentParser
+from pathlib import Path
 
+import waitress
+from flask import Flask
 from flask_alembic import Alembic
-from waitress import serve
 
 from . import __version__
-from .api import flask_app
+from .api import AppFactory
 from .orm import __db_version__, db
+from .settings import Settings
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = 5000
+MIGRATIONS_DIR = Path(__file__).parent / 'migrations'
 
 
 class Parser(ArgumentParser):
@@ -39,26 +43,48 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application"""
 
-    def __init__(self):
-        """Initialize the application"""
+    @staticmethod
+    def __initialize_db(app: Flask) -> None:
+        """Initialize database connection settings for a flask application"""
 
-        # This is temporary until the settings module is written
-        flask_app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///temp.db"
-        db.init_app(flask_app)
+        s = Settings()
+        uri = f'postgresql://{s.db_user}:{s.db_password}@{s.db_host}:{s.db_port}/{s.db_name}'
+        app.config['SQLALCHEMY_DATABASE_URI'] = uri
+        db.init_app(app)
 
     @staticmethod
-    def migrate_db() -> None:
+    def __initialize_alembic(app: Flask) -> None:
+        """Initialize alembic functionality for a flask application"""
+
+        # Make sure alembic identifies migration scripts in the correct location
+        Alembic(app).init_app(app)
+        app.config['ALEMBIC']['script_location'] = str(MIGRATIONS_DIR)
+
+    @classmethod
+    def _initialize_app(cls, app: Flask) -> None:
+        """Initialize a new flask application
+
+        Args:
+            app: The flask application to initialize
+        """
+
+        cls.__initialize_db(app)
+        cls.__initialize_alembic(app)
+
+    @classmethod
+    def migrate_db(cls) -> None:
         """Migrate the application database to the current schema
 
         If the database does not exist, it is created.
         """
 
+        flask_app = AppFactory()
+        cls._initialize_app(flask_app)
         with flask_app.app_context():
-            alembic = Alembic(flask_app)
-            alembic.upgrade(target=__db_version__)
+            Alembic(flask_app).upgrade(target=__db_version__)
 
-    @staticmethod
-    def serve_api(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+    @classmethod
+    def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
         """Run the application
 
         Args:
@@ -66,9 +92,12 @@ class Application:
             port: the port of the webserver
         """
 
-        serve(flask_app, host=host, port=port)
+        flask_app = AppFactory()
+        cls._initialize_app(flask_app)
+        waitress.serve(flask_app, host=host, port=port)
 
-    def execute(self) -> None:
+    @classmethod
+    def execute(cls) -> None:
         """Parse arguments and run the application"""
 
         parser = Parser(
