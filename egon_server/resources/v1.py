@@ -14,8 +14,8 @@ class Version(Resource):
     def get(self) -> Response:
         """Handle an incoming GET request"""
 
-        major, minor, *other = __api_version__.split('.')
-        return jsonify({'version': f'{major}.{minor}'})
+        major, *other = __api_version__.split('.')
+        return jsonify({'version': major})
 
 
 class Pipeline(Resource):
