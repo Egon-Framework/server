@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import waitress
-from flask import Flask
+from flask import Flask, jsonify
 from flask_alembic import Alembic
 
 from . import __version__
@@ -38,6 +38,22 @@ class Parser(ArgumentParser):
 
 class Application:
     """Entry point for instantiating and executing the application"""
+
+    @staticmethod
+    def __initialize_errors(app: Flask) -> None:
+        """Initialize custom flask error handling
+
+        Args:
+            app: The Flask application to initialize
+        """
+
+        @app.errorhandler(404)
+        def page_not_found(*args):
+            """Return a 404 error as a JSON response"""
+
+            return jsonify({'error': 404, 'message': 'The requested resource could not be found.'})
+
+        app.config['PROPAGATE_EXCEPTIONS'] = True
 
     @staticmethod
     def __initialize_db(app: Flask) -> None:
@@ -74,6 +90,7 @@ class Application:
 
         cls.__initialize_db(app)
         cls.__initialize_alembic(app)
+        cls.__initialize_404(app)
 
     @classmethod
     def migrate_db(cls, schema_version: str = __db_version__) -> None:
