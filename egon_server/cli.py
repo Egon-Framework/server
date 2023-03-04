@@ -48,7 +48,7 @@ class Application:
         """Initialize database connection settings for a flask application"""
 
         s = Settings()
-        uri = f'postgresql://{s.db_user}:{s.db_password}@{s.db_host}:{s.db_port}/{s.db_name}'
+        uri = f'postgresql+asyncpg://{s.db_user}:{s.db_password}@{s.db_host}:{s.db_port}/{s.db_name}'
         app.config['SQLALCHEMY_DATABASE_URI'] = uri
         db.init_app(app)
 
