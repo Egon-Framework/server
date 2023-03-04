@@ -1,12 +1,9 @@
-"""Migrates database to schema version 0.1
-
-Revision ID: 0.1
-"""
+"""Migrates database to schema version 0.1."""
 
 import sqlalchemy as sa
 from alembic import op
 
-# revision identifiers, used by Alembic.
+# Revision identifiers used by Alembic
 revision = '0.1'
 down_revision = None
 branch_labels = ('default',)
@@ -36,4 +33,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade from the current database versions to the previous revision"""
 
-    raise RuntimeError('There is no evision below this version to revert to.')
+    raise RuntimeError('There is no revision below this version to revert to.')
