@@ -4,11 +4,11 @@ from dataclasses import dataclass
 
 from flask_sqlalchemy import SQLAlchemy
 
-__db_version__ = '0.1'
-
+__db_version__ = '0.1'  # Schema version used to track/manage DB migrations
 db = SQLAlchemy()
 
 
+@dataclass()
 class Pipeline(db.Model):
     """Metadata for a running pipeline
 
@@ -21,10 +21,10 @@ class Pipeline(db.Model):
 
     __tablename__ = 'pipeline'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    pipeline_id = db.Column(db.String, nullable=False, unique=True)
-    name = db.Column(db.String, nullable=False)
-    description = db.Column(db.String, nullable=True)
+    id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    egon_id: str = db.Column(db.String, nullable=False, unique=True)
+    name: str = db.Column(db.String, nullable=False)
+    description: str = db.Column(db.String, nullable=True)
 
 
 @dataclass
@@ -40,7 +40,7 @@ class Node(db.Model):
 
     __tablename__ = 'node'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    egon_id = db.Column(db.String, nullable=False, unique=True)
-    name = db.Column(db.String, nullable=False)
-    description = db.Column(db.String, nullable=True)
+    id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    egon_id: str = db.Column(db.String, nullable=False, unique=True)
+    name: str = db.Column(db.String, nullable=False)
+    description: str = db.Column(db.String, nullable=True)

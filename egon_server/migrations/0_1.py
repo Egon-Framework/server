@@ -1,4 +1,4 @@
-"""The first revision of the application database schema
+"""Migrates database to schema version 0.1
 
 Revision ID: 0.1
 """
@@ -19,6 +19,7 @@ def upgrade() -> None:
     op.create_table(
         'node',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('egon_id', sa.String(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
         sa.PrimaryKeyConstraint('id'))
@@ -26,6 +27,7 @@ def upgrade() -> None:
     op.create_table(
         'pipeline',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('egon_id', sa.String(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
         sa.PrimaryKeyConstraint('id'))
