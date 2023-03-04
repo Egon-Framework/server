@@ -1,4 +1,4 @@
-"""API resources for version 1 of the API"""
+"""API resources for API version 1"""
 
 from flask import abort, Response, jsonify
 from flask_restful import Resource
@@ -14,8 +14,8 @@ class Version(Resource):
     def get(self) -> Response:
         """Handle an incoming GET request"""
 
-        major, *_ = __api_version__.split('.')
-        return jsonify({'version': major})
+        major_version = __api_version__.split('.')[0]
+        return jsonify({'version': major_version})
 
 
 class Pipeline(Resource):
