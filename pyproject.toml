@@ -13,6 +13,13 @@ repository = "https://github.com/Egon-Framework/status-server"
 documentation = "https://github.com/Egon-Framework/status-server"
 keywords = ["egon", "egon-framework", "status", "server", "api"]
 classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Typing :: Typed"
 ]
 
 [tool.poetry.scripts]
