@@ -63,9 +63,7 @@ class Application:
             app: The Flask application to initialize
         """
 
-        s = Settings()
-        uri = f'postgresql+asyncpg://{s.db_user}:{s.db_password}@{s.db_host}:{s.db_port}/{s.db_name}'
-        app.config['SQLALCHEMY_DATABASE_URI'] = uri
+        app.config['SQLALCHEMY_DATABASE_URI'] = Settings().get_db_uri()
         db.init_app(app)
 
     @staticmethod

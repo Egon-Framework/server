@@ -52,6 +52,11 @@ class Settings(BaseSettings):
     log_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = Field(
         title='Logging Level', default='INFO', description='Application logging level.')
 
+    def get_db_uri(self) -> str:
+        """Return the fully qualified database URI"""
+
+        return f'postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}'
+
     def get_log_settings(self) -> dict:
         """Return a dictionary with configuration settings for the Python logger"""
 
