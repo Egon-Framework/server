@@ -7,7 +7,11 @@ Order of priority when resolving application settings:
   4. Default values defined by the ``Settings`` class
 """
 
+from pathlib import Path
+
 from pydantic import BaseSettings, Field
+
+_SECRETS_DIR = Path('/etc/egon_server/secrets')
 
 
 class Settings(BaseSettings):
@@ -23,6 +27,10 @@ class Settings(BaseSettings):
     class Config:
         """Configure settings parsing options"""
 
+        allow_mutation = False
         env_prefix = "EGON_"
         case_sensitive = False
-        secrets_dir = '/etc/egon_server/secrets'
+
+        # Only look for secrets if the exits - avoids pydantic warnings/errors
+        if _SECRETS_DIR.exists():
+            secrets_dir = _SECRETS_DIR
