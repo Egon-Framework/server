@@ -21,11 +21,17 @@ class AppFactory:
 
         flask_app = Flask(*args, import_name=import_name, **kwargs)
 
+        # Create a new API instance while protecting the Flask error handlers. See:
+        # https://github.com/flask-restful/flask-restful/issues/280#issuecomment-280648790
+        handle_exception = flask_app.handle_exception
+        handle_user_exception = flask_app.handle_user_exception
         api = Api(flask_app)
+        flask_app.handle_exception = handle_exception
+        flask_app.handle_user_exception = handle_user_exception
+
         api.add_resource(resources.common.Description, '/')
         api.add_resource(resources.common.Health, '/health')
-
-        cls.add_v1_endpoints(api, endpoint_root='/V1')
+        cls.add_v1_endpoints(api, endpoint_root='/v1')
         return flask_app
 
     @staticmethod
@@ -40,5 +46,5 @@ class AppFactory:
 
         endpoint_root = cls._clean_endpoint_root(endpoint_root)
         api.add_resource(resources.v1.Version, f'{endpoint_root}/version')
-        api.add_resource(resources.v1.Pipeline, f'{endpoint_root}pipeline/<string:pipelineId>')
+        api.add_resource(resources.v1.Pipeline, f'{endpoint_root}/pipeline/<string:pipelineId>')
         api.add_resource(resources.v1.Node, f'{endpoint_root}/node/<string:nodeId>')
