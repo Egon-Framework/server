@@ -77,7 +77,7 @@ class Application:
         """
 
         # Make sure alembic identifies migration scripts in the correct location
-        Alembic(app).init_app(app)
+        Alembic(app, run_mkdir=False).init_app(app)
         app.config['ALEMBIC']['script_location'] = str(MIGRATIONS_DIR)
 
     @classmethod
