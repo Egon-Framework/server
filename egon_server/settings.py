@@ -1,18 +1,17 @@
 """Parses application settings from external configuration sources.
 
-Order of priority:
-
-1. Environment variables prefixed by the string ``EGON_``
-2. Values loaded from a dotenv (.env) file
-3. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
-4. Default values defined by the ``Settings`` class
+Order of priority when resolving application settings:
+  1. Environment variables prefixed by the string ``EGON_``
+  2. Values loaded from a dotenv (.env) file
+  3. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
+  4. Default values defined by the ``Settings`` class
 """
 
 from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    """Defines the schema and default values for application settings"""
+    """Defines the application settings schema"""
 
     # Settings for the database connection
     db_user: str = Field(title='Database Username', default='egon_user', description='Database username')
