@@ -14,7 +14,7 @@ class Version(Resource):
     def get(self) -> Response:
         """Handle an incoming GET request"""
 
-        major, *other = __api_version__.split('.')
+        major, *_ = __api_version__.split('.')
         return jsonify({'version': major})
 
 
