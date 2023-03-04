@@ -18,11 +18,7 @@ MIGRATIONS_DIR = Path(__file__).parent / 'migrations'
 
 
 class Parser(ArgumentParser):
-    """Application commandline parser
-
-    Defines the application command line interface and handles parsing of
-    command line arguments.
-    """
+    """Defines the command line interface and handles command line argument parsing"""
 
     def __init__(self, *args, **kwargs) -> None:
         """Define the command line interface"""
@@ -45,7 +41,11 @@ class Application:
 
     @staticmethod
     def __initialize_db(app: Flask) -> None:
-        """Initialize database connection settings for a flask application"""
+        """Initialize database connection settings for a flask application
+
+        Args:
+            app: The Flask application to initialize
+        """
 
         s = Settings()
         uri = f'postgresql+asyncpg://{s.db_user}:{s.db_password}@{s.db_host}:{s.db_port}/{s.db_name}'
@@ -54,7 +54,11 @@ class Application:
 
     @staticmethod
     def __initialize_alembic(app: Flask) -> None:
-        """Initialize alembic functionality for a flask application"""
+        """Initialize alembic functionality for a flask application
+
+        Args:
+            app: The Flask application to initialize
+        """
 
         # Make sure alembic identifies migration scripts in the correct location
         Alembic(app).init_app(app)
@@ -65,7 +69,7 @@ class Application:
         """Initialize a new flask application
 
         Args:
-            app: The flask application to initialize
+            app: The Flask application to initialize
         """
 
         cls.__initialize_db(app)
@@ -86,7 +90,7 @@ class Application:
 
     @classmethod
     def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
-        """Run the application
+        """Launch the API web server on the given host and port
 
         Args:
             host: the hostname to listen on
@@ -99,7 +103,7 @@ class Application:
 
     @classmethod
     def execute(cls) -> None:
-        """Parse arguments and run the application"""
+        """Parse command line arguments and run the application"""
 
         parser = Parser(
             prog='egon-server',

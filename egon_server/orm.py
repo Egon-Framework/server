@@ -8,9 +8,12 @@ __db_version__ = '0.1'  # Schema version used to track/manage DB migrations
 db = SQLAlchemy()
 
 
-@dataclass()
+# Table classes are wrapped as dataclasses and all fields are type hinted.
+# This allows Flask to automatically serialize table rows into JSON responses
+
+@dataclass
 class Pipeline(db.Model):
-    """Metadata for a running pipeline
+    """Metadata table for Egon pipelines
 
     Table Fields:
       - id         (Integer): Primary key for this table
@@ -29,7 +32,7 @@ class Pipeline(db.Model):
 
 @dataclass
 class Node(db.Model):
-    """Metadata for a pipeline node
+    """Metadata for Egon pipeline nodes
 
     Table Fields:
       - id         (Integer): Primary key for this table
