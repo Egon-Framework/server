@@ -72,16 +72,17 @@ class Application:
         cls.__initialize_alembic(app)
 
     @classmethod
-    def migrate_db(cls) -> None:
+    def migrate_db(cls, schema_version: str = __db_version__) -> None:
         """Migrate the application database to the current schema
 
-        If the database does not exist, it is created.
+        Args:
+            schema_version: The schema version to migrate to
         """
 
         flask_app = AppFactory()
         cls._initialize_app(flask_app)
         with flask_app.app_context():
-            Alembic(flask_app).upgrade(target=__db_version__)
+            Alembic(flask_app).upgrade(target=schema_version)
 
     @classmethod
     def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
