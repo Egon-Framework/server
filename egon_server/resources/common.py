@@ -19,6 +19,4 @@ class Description(Resource):
     def get(self) -> Response:
         """Handle an incoming GET request"""
 
-        return Response(
-            'The Egon Framework status API. '
-            'See https://egon-framework.github.io/status-api/ for more details.')
+        return Response('The Egon Status API.')
