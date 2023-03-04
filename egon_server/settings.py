@@ -70,15 +70,15 @@ class Settings(BaseSettings):
             },
             'handlers': {
                 'console': {
-                    'level': 'ERROR',
                     'class': 'logging.StreamHandler',
+                    'level': 0,
                     'formatter': 'default',
                     'stream': 'ext://sys.stdout',
                 },
                 'email': {
                     'class': 'logging.handlers.SMTPHandler',
-                    'formatter': 'default',
                     'level': self.admin_threshold,
+                    'formatter': 'default',
                     'mailhost': (self.smtp_host, self.smtp_port),
                     'fromaddr': 'donotreply@egonframework.com',
                     'toaddrs': self.admin_emails,
@@ -87,6 +87,7 @@ class Settings(BaseSettings):
                 },
                 'log_file': {
                     'class': 'logging.handlers.RotatingFileHandler',
+                    'level': self.log_level,
                     'formatter': 'default',
                     'filename': '/var/log/egon_api_server.log',
                     'maxBytes': 10000,
@@ -94,8 +95,15 @@ class Settings(BaseSettings):
                     'delay': 'True',
                 },
             },
+            "loggers": {
+                "waitress": {
+                    "handlers": ['log_file', 'email', 'console'],
+                    "level": 0,
+                    "propagate": False,
+                }
+            },
             'root': {
-                'level': 'INFO',
+                'level': 0,
                 'handlers': ['console', 'log_file', 'email'],
             }
         }
