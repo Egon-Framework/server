@@ -1,7 +1,8 @@
 """API resources for API version 1"""
 
-from flask import abort, Response, jsonify
-from flask_restful import Resource
+from fastapi import HTTPException
+from fastapi.responses import Response, JSONResponse
+from fastapi_restful import Resource
 
 from egon_server import orm
 
@@ -15,7 +16,7 @@ class Version(Resource):
         """Handle an incoming GET request"""
 
         major_version = __api_version__.split('.')[0]
-        return jsonify({'version': major_version})
+        return JSONResponse({'version': major_version})
 
 
 class Pipeline(Resource):
@@ -33,9 +34,9 @@ class Pipeline(Resource):
         ).first()
 
         if db_object is None:
-            abort(404)
+            raise HTTPException(status_code=404, detail="Item not found")
 
-        return jsonify(db_object)
+        return JSONResponse(db_object)
 
 
 class Node(Resource):
@@ -53,6 +54,6 @@ class Node(Resource):
         ).first()
 
         if db_object is None:
-            abort(404)
+            raise HTTPException(status_code=404, detail="Item not found")
 
-        return jsonify(db_object)
+        return JSONResponse(db_object)

@@ -1,7 +1,7 @@
 """Common API resources used across several API versions."""
 
-from flask import Response
-from flask_restful import Resource
+from fastapi.responses import Response
+from fastapi_restful import Resource
 
 
 class Health(Resource):
@@ -10,7 +10,7 @@ class Health(Resource):
     def get(self) -> Response:
         """Handle an incoming GET request"""
 
-        return Response(status=200)
+        return Response(status_code=200)
 
 
 class Description(Resource):
