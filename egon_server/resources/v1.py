@@ -10,16 +10,6 @@ from egon_server import orm
 __api_version__ = '1.0'
 
 
-class Version(Resource):
-    """Resource for checking the API version"""
-
-    def get(self) -> Response:
-        """Handle an incoming GET request"""
-
-        major_version = __api_version__.split('.')[0]
-        return JSONResponse({'version': major_version})
-
-
 class Pipeline(Resource):
     """Resource for pipeline metadata"""
 

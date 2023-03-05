@@ -38,6 +38,6 @@ class AppFactory:
         """Add endpoints for version 1 of the API specification"""
 
         endpoint_root = cls._clean_endpoint_root(endpoint_root)
-        api.add_resource(resources.v1.Version(), f'{endpoint_root}/version')
+        api.add_resource(resources.common.Version(1), f'{endpoint_root}/version')
         api.add_resource(resources.v1.Pipeline(), f'{endpoint_root}/pipeline/<string:pipelineId>')
         api.add_resource(resources.v1.Node(), f'{endpoint_root}/node/<string:nodeId>')
