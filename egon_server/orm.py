@@ -2,17 +2,16 @@
 
 from dataclasses import dataclass
 
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import declarative_base
 
 __db_version__ = '0.1'  # Schema version used to track/manage DB migrations
-db = SQLAlchemy()
 
+Base = declarative_base()
 
-# Table classes are wrapped as dataclasses and all fields are type hinted.
-# This allows Flask to automatically serialize table rows into JSON responses
 
 @dataclass
-class Pipeline(db.Model):
+class Pipeline(Base):
     """Metadata table for Egon pipelines
 
     Table Fields:
@@ -24,14 +23,14 @@ class Pipeline(db.Model):
 
     __tablename__ = 'pipeline'
 
-    id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    egon_id: str = db.Column(db.String, nullable=False, unique=True)
-    name: str = db.Column(db.String, nullable=False)
-    description: str = db.Column(db.String, nullable=True)
+    id: int = Column(Integer, primary_key=True, autoincrement=True)
+    egon_id: str = Column(String, nullable=False, unique=True)
+    name: str = Column(String, nullable=False)
+    description: str = Column(String, nullable=True)
 
 
 @dataclass
-class Node(db.Model):
+class Node(Base):
     """Metadata for Egon pipeline nodes
 
     Table Fields:
@@ -43,7 +42,7 @@ class Node(db.Model):
 
     __tablename__ = 'node'
 
-    id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    egon_id: str = db.Column(db.String, nullable=False, unique=True)
-    name: str = db.Column(db.String, nullable=False)
-    description: str = db.Column(db.String, nullable=True)
+    id: int = Column(Integer, primary_key=True, autoincrement=True)
+    egon_id: str = Column(String, nullable=False, unique=True)
+    name: str = Column(String, nullable=False)
+    description: str = Column(String, nullable=True)
