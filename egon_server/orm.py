@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional, Callable
 
+from fastapi import Depends
 from requests import Session
 from sqlalchemy import Column, Integer, String
 from sqlalchemy import create_engine, Engine, Connection
@@ -25,6 +26,7 @@ class DBConnection:
     engine: Optional[Engine] = None
     connection: Optional[Connection] = None
     session_maker: Optional[Callable[[], Session]] = None
+    session_depends: Optional[Callable[[], Session]] = None
 
     @classmethod
     def configure(cls, url: str) -> None:
@@ -43,6 +45,7 @@ class DBConnection:
         cls.engine = create_engine(url)
         cls.connection = cls.engine.connect()
         cls.session_maker = sessionmaker(cls.engine)
+        cls.session_depends = Depends(cls.session_maker)
 
 
 @dataclass
