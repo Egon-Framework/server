@@ -6,7 +6,6 @@ from alembic import op
 # Revision identifiers used by Alembic
 revision = '0.1'
 down_revision = None
-branch_labels = ('default',)
 depends_on = None
 
 
