@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     db_port: int = Field(title='Database Port', default=5432, description='Port number for accessing the database host')
     db_name: str = Field(title='Database Name', default='egon', description='Application database name')
 
+    def get_db_uri(self) -> str:
+        """Return the fully qualified database URI"""
+
+        return f'postgresql+asyncpg://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_name}'
+
     class Config:
         """Configure settings parsing options"""
 

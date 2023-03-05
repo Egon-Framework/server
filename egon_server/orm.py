@@ -1,13 +1,48 @@
 """Object relational mapper for the application database."""
 
 from dataclasses import dataclass
+from typing import Optional, Callable
 
+from requests import Session
 from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import create_engine, Engine, Connection
+from sqlalchemy.orm import sessionmaker, declarative_base
 
 __db_version__ = '0.1'  # Schema version used to track/manage DB migrations
 
 Base = declarative_base()
+
+
+class DBConnection:
+    """A configurable connection to the application database
+
+    This class acts as the primary interface for connecting to the application
+    database. Use the ``configure`` method to change the location of the
+    underlying application database. Changes made via this class will
+    propagate to the entire parent application.
+    """
+
+    engine: Optional[Engine] = None
+    connection: Optional[Connection] = None
+    session_maker: Optional[Callable[[], Session]] = None
+
+    @classmethod
+    def configure(cls, url: str) -> None:
+        """Update the connection information for the underlying database
+
+        Changes made here will affect the entire running application
+
+        Args:
+            url: URL information for the application database
+        """
+
+        if cls.connection:
+            cls.connection.close()
+
+        cls.connection = None
+        cls.engine = create_engine(url)
+        cls.connection = cls.engine.connect()
+        cls.session_maker = sessionmaker(cls.engine)
 
 
 @dataclass
