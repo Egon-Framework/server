@@ -1,38 +1,31 @@
 """URL routing for the application's REST API."""
 
-from flask import Flask
-from flask_restful import Api
+from fastapi import FastAPI
+from fastapi_restful import Api
 
 from . import resources
 
 
 class AppFactory:
-    """Factory class for creating new Flask API applications"""
+    """Factory class for creating new FastAPI applications"""
 
-    def __new__(cls, *args, import_name: str = 'egon-server', **kwargs) -> Flask:
-        """Create a new Flask API application
+    def __new__(cls, *args, import_name: str = 'egon-server', **kwargs) -> FastAPI:
+        """Create a new FastAPI application
 
         Args:
-            Accepts the same positional and keyword arguments as the ``flask.Flask`` object
+            Accepts the same positional and keyword arguments as the ``fastapi.FastAPI`` object
 
         Returns:
-           An new flask application
+           A new FastAPI application instance with established API endpoints
         """
 
-        flask_app = Flask(*args, import_name=import_name, **kwargs)
+        app = FastAPI(*args, import_name=import_name, **kwargs)
+        api = Api(app)
 
-        # Create a new API instance while protecting the Flask error handlers. See:
-        # https://github.com/flask-restful/flask-restful/issues/280#issuecomment-280648790
-        handle_exception = flask_app.handle_exception
-        handle_user_exception = flask_app.handle_user_exception
-        api = Api(flask_app)
-        flask_app.handle_exception = handle_exception
-        flask_app.handle_user_exception = handle_user_exception
-
-        api.add_resource(resources.common.Description, '/')
-        api.add_resource(resources.common.Health, '/health')
+        api.add_resource(resources.common.Description(), '/')
+        api.add_resource(resources.common.Health(), '/health')
         cls.add_v1_endpoints(api, endpoint_root='/v1')
-        return flask_app
+        return app
 
     @staticmethod
     def _clean_endpoint_root(endpoint_root: str) -> str:
@@ -45,6 +38,6 @@ class AppFactory:
         """Add endpoints for version 1 of the API specification"""
 
         endpoint_root = cls._clean_endpoint_root(endpoint_root)
-        api.add_resource(resources.v1.Version, f'{endpoint_root}/version')
-        api.add_resource(resources.v1.Pipeline, f'{endpoint_root}/pipeline/<string:pipelineId>')
-        api.add_resource(resources.v1.Node, f'{endpoint_root}/node/<string:nodeId>')
+        api.add_resource(resources.common.Version(1), f'{endpoint_root}/version')
+        api.add_resource(resources.v1.Pipeline(), endpoint_root + '/pipeline/{pipelineId}')
+        api.add_resource(resources.v1.Node(), endpoint_root + '/node/{nodeId}/')

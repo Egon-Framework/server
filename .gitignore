@@ -31,9 +31,5 @@ MANIFEST
 .coverage
 coverage.xml
 
-# Flask stuff:
-instance/
-.webassets-cache
-
 # IDE files
 .idea
