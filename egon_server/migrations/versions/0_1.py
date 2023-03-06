@@ -18,6 +18,7 @@ def upgrade() -> None:
         sa.Column('egon_id', sa.String(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
+        sa.Column('last_updated', sa.DateTime(timezone=True), nullable=False, default=sa.func.now()),
         sa.PrimaryKeyConstraint('id'))
 
     op.create_table(
@@ -26,6 +27,7 @@ def upgrade() -> None:
         sa.Column('egon_id', sa.String(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=True),
+        sa.Column('last_updated', sa.DateTime(timezone=True), nullable=False, default=sa.func.now()),
         sa.PrimaryKeyConstraint('id'))
 
 
