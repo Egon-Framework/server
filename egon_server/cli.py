@@ -40,6 +40,7 @@ class Application:
     """Entry point for instantiating and executing the application"""
 
     settings = Settings()
+    app = AppFactory()
 
     @classmethod
     def migrate_db(cls, schema_version: str = __db_version__) -> None:
@@ -68,9 +69,8 @@ class Application:
             workers: Number of worker processes to spawn
         """
 
-        app = AppFactory()
         DBConnection.configure(url=cls.settings.get_db_uri())
-        uvicorn.run(app, host=host, port=port, workers=workers)
+        uvicorn.run('egon_server.cli:Application.app', host=host, port=port, workers=workers)
 
     @classmethod
     def execute(cls) -> None:
