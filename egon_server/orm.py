@@ -1,10 +1,11 @@
 """Object relational mapper for the application database."""
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, Callable
 
 from requests import Session
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy import Connection
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -51,9 +52,10 @@ class Pipeline(Base):
 
     Table Fields:
       - id         (Integer): Primary key for this table
-      - egon_id        (str): Unique pipeline ID used by Egon
+      - egon_id     (String): Unique pipeline ID used by Egon
       - name        (String): Human readable pipeline name
       - description (String): Description of the pipeline function
+      - last_updated  (Date): The last time the record was updated
     """
 
     __tablename__ = 'pipeline'
@@ -62,6 +64,7 @@ class Pipeline(Base):
     egon_id: str = Column(String, nullable=False, unique=True)
     name: str = Column(String, nullable=False)
     description: str = Column(String, nullable=True)
+    last_updated: datetime = Column(DateTime(timezone=True), nullable=False, default=func.now())
 
 
 @dataclass
@@ -70,9 +73,10 @@ class Node(Base):
 
     Table Fields:
       - id         (Integer): Primary key for this table
-      - egon_id        (str): Unique Node ID used by Egon
+      - egon_id     (String): Unique Node ID used by Egon
       - name        (String): Human readable node name
       - description (String): Description of the node's function
+      - last_updated  (Date): The last time the record was updated
     """
 
     __tablename__ = 'node'
@@ -81,3 +85,4 @@ class Node(Base):
     egon_id: str = Column(String, nullable=False, unique=True)
     name: str = Column(String, nullable=False)
     description: str = Column(String, nullable=True)
+    last_updated: datetime = Column(DateTime(timezone=True), nullable=False, default=func.now())
