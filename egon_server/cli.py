@@ -32,6 +32,7 @@ class Parser(ArgumentParser):
         serve.set_defaults(action=Application.serve_api)
         serve.add_argument('--host', type=str, default=DEFAULT_HOST, help='the hostname to listen on')
         serve.add_argument('--port', type=int, default=DEFAULT_PORT, help='the port of the webserver')
+        serve.add_argument('--workers', type=int, default=1, help='number of worker processes to spawn')
 
 
 class Application:
@@ -57,17 +58,18 @@ class Application:
         command.downgrade(alembic_cfg, schema_version)
 
     @classmethod
-    def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
+    def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, workers: int = 1) -> None:
         """Launch the API web server on the given host and port
 
         Args:
             host: the hostname to listen on
             port: the port of the webserver
+            workers: Number of worker processes to spawn
         """
 
         app = AppFactory()
         DBConnection.configure(url=cls.settings.get_db_uri())
-        uvicorn.run(app, host=host, port=port, log_config=cls.settings.get_log_settings())
+        uvicorn.run(app, host=host, port=port, workers=workers, log_config=cls.settings.get_log_settings())
 
     @classmethod
     def execute(cls) -> None:
