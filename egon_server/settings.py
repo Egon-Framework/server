@@ -75,7 +75,7 @@ class Settings(BaseSettings):
                     'formatter': 'default',
                     'stream': 'ext://sys.stdout',
                 },
-                'email': {
+                'admin_email': {
                     'class': 'logging.handlers.SMTPHandler',
                     'level': self.admin_threshold,
                     'formatter': 'default',
@@ -95,15 +95,22 @@ class Settings(BaseSettings):
                     'delay': 'True',
                 },
             },
-            "loggers": {
-                "waitress": {
-                    "handlers": ['log_file', 'email', 'console'],
-                    "level": 0,
-                    "propagate": False,
+            'loggers': {
+                'uvicorn': {
+                    'handlers': ['console', 'log_file'],
+                    'level': 0
+                },
+                'uvicorn.error': {
+                    'level': 0,
+                    'handlers': ['console', 'log_file', 'admin_email'],
+                },
+                'uvicorn.access': {
+                    'handlers': ['console', 'log_file'],
+                    'level': 0,
                 }
             },
             'root': {
+                'handlers': ['console', 'log_file'],
                 'level': 0,
-                'handlers': ['console', 'log_file', 'email'],
             }
         }

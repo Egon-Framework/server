@@ -52,8 +52,8 @@ class Application:
         alembic_cfg.set_main_option('script_location', str(MIGRATIONS_DIR))
         alembic_cfg.set_main_option('sqlalchemy.url', cls.settings.get_db_uri())
 
-        # Upgrade/downgrade commands are null if the destination version is
-        # below/above the current revision
+        # Upgrade/downgrade commands are null operations if the destination
+        # version is below/above the current revision
         command.upgrade(alembic_cfg, schema_version)
         command.downgrade(alembic_cfg, schema_version)
 
