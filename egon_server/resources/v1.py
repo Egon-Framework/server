@@ -1,58 +1,54 @@
 """API resources for API version 1"""
 
-from flask import abort, Response, jsonify
-from flask_restful import Resource
+from dataclasses import asdict
+
+from fastapi import HTTPException
+from fastapi.responses import Response, JSONResponse
+from fastapi_restful import Resource
+from sqlalchemy import select
 
 from egon_server import orm
 
 __api_version__ = '1.0'
 
 
-class Version(Resource):
-    """Resource for checking the API version"""
-
-    def get(self) -> Response:
-        """Handle an incoming GET request"""
-
-        major_version = __api_version__.split('.')[0]
-        return jsonify({'version': major_version})
-
-
 class Pipeline(Resource):
     """Resource for pipeline metadata"""
 
-    def get(self, pipelineId) -> Response:
+    async def get(self, pipelineId: str) -> Response:
         """Fetch data describing an egon pipeline
 
         Args:
             pipelineId: The pipeline ID assigned by Egon
         """
 
-        db_object = orm.Pipeline.query.filter(
-            orm.Pipeline.egon_id == pipelineId
-        ).first()
+        query = select(orm.Pipeline).where(orm.Pipeline.egon_id == pipelineId)
+        async with orm.DBConnection.session_maker() as session:
+            result = await session.execute(query)
+            db_object = result.scalars().first()
 
         if db_object is None:
-            abort(404)
+            raise HTTPException(status_code=404)
 
-        return jsonify(db_object)
+        return JSONResponse(asdict(db_object))
 
 
 class Node(Resource):
     """Resource for node metadata"""
 
-    def get(self, nodeId) -> Response:
+    async def get(self, nodeId: str) -> Response:
         """Fetch data describing an egon node
 
         Args:
             nodeId: The node ID assigned by Egon
         """
 
-        db_object = orm.Node.query.filter(
-            orm.Node.egon_id == nodeId
-        ).first()
+        query = select(orm.Node).where(orm.Node.egon_id == nodeId)
+        async with orm.DBConnection.session_maker() as session:
+            result = await session.execute(query)
+            db_object = result.scalars().first()
 
         if db_object is None:
-            abort(404)
+            raise HTTPException(status_code=404)
 
-        return jsonify(db_object)
+        return JSONResponse(asdict(db_object))

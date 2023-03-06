@@ -1,7 +1,25 @@
 """Common API resources used across several API versions."""
 
-from flask import Response
-from flask_restful import Resource
+from fastapi.responses import Response, JSONResponse
+from fastapi_restful import Resource
+
+
+class Version(Resource):
+    """Resource for checking the API version"""
+
+    def __init__(self, version: int) -> None:
+        """Initialize the resource for a given version number:
+
+        Args:
+            version: The version number
+        """
+
+        self._version = version
+
+    def get(self) -> Response:
+        """Handle an incoming GET request"""
+
+        return JSONResponse({'version': self._version})
 
 
 class Health(Resource):
@@ -10,7 +28,7 @@ class Health(Resource):
     def get(self) -> Response:
         """Handle an incoming GET request"""
 
-        return Response(status=200)
+        return Response(status_code=200)
 
 
 class Description(Resource):

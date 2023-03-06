@@ -3,14 +3,12 @@
 from argparse import ArgumentParser
 from pathlib import Path
 
-import waitress
-from flask import Flask, jsonify, Response
-from flask_alembic import Alembic
-from werkzeug.exceptions import HTTPException
+import uvicorn
+from alembic import config, command
 
 from . import __version__
 from .api import AppFactory
-from .orm import __db_version__, db
+from .orm import __db_version__, DBConnection
 from .settings import Settings
 
 DEFAULT_HOST = 'localhost'
@@ -40,57 +38,7 @@ class Parser(ArgumentParser):
 class Application:
     """Entry point for instantiating and executing the application"""
 
-    @staticmethod
-    def __initialize_error_handling(app: Flask) -> None:
-        """Initialize custom flask error handling
-
-        Args:
-            app: The Flask application to initialize
-        """
-
-        @app.errorhandler(404)
-        @app.errorhandler(500)
-        def page_not_found(error: HTTPException) -> Response:
-            """Return a 404 error as a JSON response"""
-
-            return jsonify({'error': error.code, 'message': error.name})
-
-    @staticmethod
-    def __initialize_db(app: Flask) -> None:
-        """Initialize database connection settings for a flask application
-
-        Args:
-            app: The Flask application to initialize
-        """
-
-        s = Settings()
-        uri = f'postgresql+asyncpg://{s.db_user}:{s.db_password}@{s.db_host}:{s.db_port}/{s.db_name}'
-        app.config['SQLALCHEMY_DATABASE_URI'] = uri
-        db.init_app(app)
-
-    @staticmethod
-    def __initialize_alembic(app: Flask) -> None:
-        """Initialize alembic functionality for a flask application
-
-        Args:
-            app: The Flask application to initialize
-        """
-
-        # Make sure alembic identifies migration scripts in the correct location
-        Alembic(app, run_mkdir=False).init_app(app)
-        app.config['ALEMBIC']['script_location'] = str(MIGRATIONS_DIR)
-
-    @classmethod
-    def _initialize_app(cls, app: Flask) -> None:
-        """Initialize a new flask application
-
-        Args:
-            app: The Flask application to initialize
-        """
-
-        cls.__initialize_db(app)
-        cls.__initialize_alembic(app)
-        cls.__initialize_error_handling(app)
+    settings = Settings()
 
     @classmethod
     def migrate_db(cls, schema_version: str = __db_version__) -> None:
@@ -100,10 +48,14 @@ class Application:
             schema_version: The schema version to migrate to
         """
 
-        flask_app = AppFactory()
-        cls._initialize_app(flask_app)
-        with flask_app.app_context():
-            Alembic(flask_app).upgrade(target=schema_version)
+        alembic_cfg = config.Config()
+        alembic_cfg.set_main_option('script_location', str(MIGRATIONS_DIR))
+        alembic_cfg.set_main_option('sqlalchemy.url', cls.settings.get_db_uri())
+
+        # Upgrade/downgrade commands are null if the destination version is
+        # below/above the current revision
+        command.upgrade(alembic_cfg, schema_version)
+        command.downgrade(alembic_cfg, schema_version)
 
     @classmethod
     def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT) -> None:
@@ -114,9 +66,9 @@ class Application:
             port: the port of the webserver
         """
 
-        flask_app = AppFactory()
-        cls._initialize_app(flask_app)
-        waitress.serve(flask_app, host=host, port=port)
+        app = AppFactory()
+        DBConnection.configure(url=cls.settings.get_db_uri())
+        uvicorn.run(app, host=host, port=port)
 
     @classmethod
     def execute(cls) -> None:
