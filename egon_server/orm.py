@@ -5,7 +5,8 @@ from typing import Optional, Callable
 
 from requests import Session
 from sqlalchemy import Column, Integer, String
-from sqlalchemy import create_engine, Engine, Connection
+from sqlalchemy import Connection
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 __db_version__ = '0.1'  # Schema version used to track/manage DB migrations
@@ -22,12 +23,12 @@ class DBConnection:
     propagate to the entire parent application.
     """
 
-    engine: Optional[Engine] = None
+    engine: Optional[AsyncEngine] = None
     connection: Optional[Connection] = None
     session_maker: Optional[Callable[[], Session]] = None
 
     @classmethod
-    async def configure(cls, url: str) -> None:
+    def configure(cls, url: str) -> None:
         """Update the connection information for the underlying database
 
         Changes made here will affect the entire running application
@@ -40,9 +41,8 @@ class DBConnection:
             cls.connection.close()
 
         cls.connection = None
-        cls.engine = create_engine(url)
-        cls.connection = await cls.engine.connect()
-        cls.session_maker = sessionmaker(cls.engine)
+        cls.engine = create_async_engine(url)
+        cls.session_maker = sessionmaker(cls.engine, class_=AsyncSession)
 
 
 @dataclass

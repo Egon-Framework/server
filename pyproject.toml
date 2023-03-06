@@ -27,7 +27,6 @@ egon-server = "egon_server.__main__:main"
 
 [tool.poetry.dependencies]
 python = "3.11"
-waitress = "^2.1.2"
 sqlalchemy = "^2.0.4"
 pydantic = "^1.10.5"
 asyncpg = "^0.27.0"

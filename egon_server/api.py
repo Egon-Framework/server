@@ -39,5 +39,5 @@ class AppFactory:
 
         endpoint_root = cls._clean_endpoint_root(endpoint_root)
         api.add_resource(resources.common.Version(1), f'{endpoint_root}/version')
-        api.add_resource(resources.v1.Pipeline(), f'{endpoint_root}/pipeline/<string:pipelineId>')
-        api.add_resource(resources.v1.Node(), f'{endpoint_root}/node/<string:nodeId>')
+        api.add_resource(resources.v1.Pipeline(), endpoint_root + '/pipeline/{pipelineId}')
+        api.add_resource(resources.v1.Node(), endpoint_root + '/node/{nodeId}/')
