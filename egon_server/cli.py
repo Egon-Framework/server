@@ -1,5 +1,4 @@
 """The application command line interface."""
-
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -68,7 +67,7 @@ class Application:
 
         app = AppFactory()
         DBConnection.configure(url=cls.settings.get_db_uri())
-        uvicorn.run(app, host=host, port=port)
+        uvicorn.run(app, host=host, port=port, log_config=cls.settings.get_log_settings())
 
     @classmethod
     def execute(cls) -> None:
