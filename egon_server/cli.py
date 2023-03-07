@@ -1,4 +1,5 @@
 """The application command line interface."""
+
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -74,7 +75,7 @@ class Application:
             host=host,
             port=port,
             workers=workers,
-            log_config=cls.settings.get_log_settings())
+            log_config=cls.settings.get_logging_config())
 
     @classmethod
     def execute(cls) -> None:
