@@ -34,6 +34,7 @@ fastapi-restful = "^0.4.3"
 fastapi = "^0.92.0"
 uvicorn = "^0.20.0"
 alembic = "^1.9.4"
+requests = "^2.28.2"
 
 [tool.poetry.group.test.dependencies]
 schemathesis = "^3.18.5"
