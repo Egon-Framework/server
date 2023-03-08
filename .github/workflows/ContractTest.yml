@@ -1,0 +1,22 @@
+name: Contract Tests
+
+on:
+  push:
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          load: true
+          tags: egon-server
+
+      - name: Test container is restartable
+        run: docker run -rm -d -p 5000:5000 egon-server
+
+      - uses: schemathesis/action@v1
+        with:
+          base-url:  http://localhost:5000
+          schema: https://raw.githubusercontent.com/Egon-Framework/status-api-schema/main/api/v0.1.yml

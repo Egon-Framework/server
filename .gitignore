@@ -33,3 +33,6 @@ coverage.xml
 
 # IDE files
 .idea
+
+# Contract testing with hypothesis
+.hypothesis
