@@ -9,7 +9,7 @@ from . import resources
 class AppFactory:
     """Factory class for creating new FastAPI applications"""
 
-    def __new__(cls, *args, import_name: str = 'egon-server', **kwargs) -> FastAPI:
+    def __new__(cls, *args, openapi_url=None, import_name: str = 'egon-server', **kwargs) -> FastAPI:
         """Create a new FastAPI application
 
         Args:
@@ -19,7 +19,7 @@ class AppFactory:
            A new FastAPI application instance with established API endpoints
         """
 
-        app = FastAPI(*args, import_name=import_name, **kwargs)
+        app = FastAPI(*args, import_name=import_name, openapi_url=openapi_url, **kwargs)
         api = Api(app)
 
         api.add_resource(resources.common.Description(), '/')
