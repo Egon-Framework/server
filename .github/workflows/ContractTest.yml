@@ -14,7 +14,7 @@ jobs:
           tags: egon-server
 
       - name: Test container is restartable
-        run: docker run -rm -d -p 5000:5000 egon-server
+        run: docker run --rm -d -p 5000:5000 egon-server serve
 
       - uses: schemathesis/action@v1
         with:
