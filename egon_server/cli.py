@@ -11,8 +11,11 @@ from .api import AppFactory
 from .orm import __db_version__, DBConnection
 from .settings import Settings
 
-DEFAULT_HOST = 'localhost'
-DEFAULT_PORT = 5000
+SETTINGS = Settings()
+DEFAULT_HOST = SETTINGS.server_host
+DEFAULT_PORT = SETTINGS.server_port
+DEFAULT_WORKERS = SETTINGS.server_port
+DEFAULT_PROXY = SETTINGS.server_port
 MIGRATIONS_DIR = Path(__file__).parent / 'migrations'
 
 
@@ -33,13 +36,13 @@ class Parser(ArgumentParser):
         serve.set_defaults(action=Application.serve_api)
         serve.add_argument('--host', type=str, default=DEFAULT_HOST, help='the hostname to listen on')
         serve.add_argument('--port', type=int, default=DEFAULT_PORT, help='the port of the webserver')
-        serve.add_argument('--workers', type=int, default=1, help='number of worker processes to spawn')
+        serve.add_argument('--workers', type=int, default=DEFAULT_WORKERS, help='number of worker processes to spawn')
+        serve.add_argument('--proxy', action='store_true', default=DEFAULT_PROXY, help='configure the server to run behind a proxy')
 
 
 class Application:
     """Entry point for instantiating and executing the application"""
 
-    settings = Settings()
     app = AppFactory()
 
     @classmethod
@@ -52,7 +55,7 @@ class Application:
 
         alembic_cfg = config.Config()
         alembic_cfg.set_main_option('script_location', str(MIGRATIONS_DIR))
-        alembic_cfg.set_main_option('sqlalchemy.url', cls.settings.get_db_uri())
+        alembic_cfg.set_main_option('sqlalchemy.url', SETTINGS.get_db_uri())
 
         # Upgrade/downgrade commands are null operations if the destination
         # version is below/above the current revision
@@ -60,22 +63,30 @@ class Application:
         command.downgrade(alembic_cfg, schema_version)
 
     @classmethod
-    def serve_api(cls, host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, workers: int = 1) -> None:
+    def serve_api(
+        cls,
+        host: str = DEFAULT_HOST,
+        port: int = DEFAULT_PORT,
+        workers: int = DEFAULT_WORKERS,
+        proxy: bool = DEFAULT_PROXY
+    ) -> None:
         """Launch the API web server on the given host and port
 
         Args:
             host: the hostname to listen on
             port: the port of the webserver
             workers: Number of worker processes to spawn
+            proxy: Configure the server to run behind a proxy
         """
 
-        DBConnection.configure(url=cls.settings.get_db_uri())
+        DBConnection.configure(url=SETTINGS.get_db_uri())
         uvicorn.run(
             app='egon_server.cli:Application.app',
             host=host,
             port=port,
             workers=workers,
-            log_config=cls.settings.get_logging_config())
+            proxy_headers=proxy,
+            log_config=SETTINGS.get_logging_config())
 
     @classmethod
     def execute(cls) -> None:

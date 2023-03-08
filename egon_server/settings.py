@@ -1,10 +1,11 @@
 """Parses application settings from external configuration sources.
 
 Order of priority when resolving application settings:
-  1. Environment variables prefixed by the string ``EGON_``
-  2. Values loaded from a dotenv (.env) file
-  3. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
-  4. Default values defined by the ``Settings`` class
+  1. Commandline arguments provided at runtime
+  2. Environment variables prefixed by the string ``EGON_``
+  3. Values loaded from a dotenv (.env) file
+  4. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
+  5. Default values defined by the ``Settings`` class
 """
 
 from pathlib import Path
@@ -30,10 +31,15 @@ class Settings(BaseSettings):
         case_sensitive = True
         allow_mutation = False
 
+    server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')
+    server_port: int = Field(title='API Server Port', default=5000, description='API server port number')
+    server_workers: int = Field(title='Web server workers', default=1, description='Webserver processes to spawn')
+    server_proxy: bool = Field(title='Web Server Proxy Mode', default=False, description='Run behind a web proxy')
+
     # Settings for the database connection
     db_user: str = Field(title='Database Username', default='egon_user', description='Database username')
     db_password: str = Field(title='Database Password', default='egon_password', description='Database password')
-    db_host: str = Field(title='Database Host', default='127.0.0.1', description='Database host address')
+    db_host: str = Field(title='Database Host', default='localhost', description='Database host address')
     db_port: int = Field(title='Database Port', default=5432, description='Database port number')
     db_name: str = Field(title='Database Name', default='egon', description='Application database name')
 
