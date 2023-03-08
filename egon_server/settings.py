@@ -28,7 +28,7 @@ class Settings(BaseSettings):
             secrets_dir = _SECRETS_DIR
 
         env_prefix = "EGON_"
-        case_sensitive = True
+        case_sensitive = False
         allow_mutation = False
 
     server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')

@@ -14,8 +14,8 @@ from .settings import Settings
 SETTINGS = Settings()
 DEFAULT_HOST = SETTINGS.server_host
 DEFAULT_PORT = SETTINGS.server_port
-DEFAULT_WORKERS = SETTINGS.server_port
-DEFAULT_PROXY = SETTINGS.server_port
+DEFAULT_WORKERS = SETTINGS.server_workers
+DEFAULT_PROXY = SETTINGS.server_proxy
 MIGRATIONS_DIR = Path(__file__).parent / 'migrations'
 
 
@@ -37,7 +37,8 @@ class Parser(ArgumentParser):
         serve.add_argument('--host', type=str, default=DEFAULT_HOST, help='the hostname to listen on')
         serve.add_argument('--port', type=int, default=DEFAULT_PORT, help='the port of the webserver')
         serve.add_argument('--workers', type=int, default=DEFAULT_WORKERS, help='number of worker processes to spawn')
-        serve.add_argument('--proxy', action='store_true', default=DEFAULT_PROXY, help='configure the server to run behind a proxy')
+        serve.add_argument('--proxy', action='store_true', default=DEFAULT_PROXY,
+                           help='configure the server to run behind a proxy')
 
 
 class Application:
