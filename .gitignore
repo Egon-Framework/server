@@ -32,3 +32,6 @@ MANIFEST
 
 # Contract testing with hypothesis
 .hypothesis
+
+# Compiled documentation
+site/
