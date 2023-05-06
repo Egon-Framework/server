@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  release:
+    types: [ released ]
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/PackageTest.yml
+    secrets: inherit
+
+  publish:
+    name: Publish Source Distribution
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      # Get the new package version from the release tag
+      # Git release tags are expected to start with "refs/tags/v"
+      - name: Set package version
+        run: |
+          release_tag=${{github.ref}}
+          poetry version "${release_tag#refs/tags/v}"
+
+      - name: Build package
+        run: poetry build -v
+
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          user: ${{ secrets.REPO_USER }}
+          password: ${{ secrets.REPO_PASSWORD }}
