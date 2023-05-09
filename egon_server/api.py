@@ -9,11 +9,10 @@ from . import resources
 class AppFactory:
     """Factory class for creating new FastAPI applications"""
 
-    def __new__(cls, *args, openapi_url=None, import_name: str = 'egon-server', **kwargs) -> FastAPI:
+    def __new__(cls, *args: any, openapi_url=None, import_name: str = 'egon-server', **kwargs) -> FastAPI:
         """Create a new FastAPI application
 
-        Args:
-            Accepts the same positional and keyword arguments as the ``fastapi.FastAPI`` object
+        Accepts the same positional and keyword arguments as the ``fastapi.FastAPI`` object
 
         Returns:
            A new FastAPI application instance with established API endpoints
