@@ -31,17 +31,17 @@ class Parser(ArgumentParser):
         """Define the command line interface"""
 
         super().__init__(prog='egon-server', description='Administrative utility for the Egon API server.')
-        self.add_argument('--version', action='version', version=__version__)
-        self.set_defaults(action=None)
+        self.add_argument('--version', callable='version', version=__version__)
+        self.set_defaults(callable=None)
         subparsers = self.add_subparsers(parser_class=ArgumentParser, required=False)
 
         # Subparser for database migrations
         migrate = subparsers.add_parser('migrate', description='Migrate the database schema to the latest version.')
-        migrate.set_defaults(action=Application.migrate_db)
+        migrate.set_defaults(callable=Application.migrate_db)
 
         # Subparser for launching the API server
         serve = subparsers.add_parser('serve', description='Launch a new API server instance.')
-        serve.set_defaults(action=Application.serve_api)
+        serve.set_defaults(callable=Application.serve_api)
         serve.add_argument('--host', type=str, default=SETTINGS.server_host, help='the hostname to listen on')
         serve.add_argument('--port', type=int, default=SETTINGS.server_port, help='the port to serve on')
         serve.add_argument('--workers', type=int, default=SETTINGS.server_workers, help='number of workers to spawn')
@@ -120,16 +120,16 @@ class Application:
         """Parse command line arguments and run the application"""
 
         parser = Parser()
-        args = vars(parser.parse_args())
+        kwargs = vars(parser.parse_args())
 
         # If CLI is called without any argument, print the help and exit
-        if action := args.pop('action') is None:
+        if callable_ := kwargs.pop('callable') is None:
             parser.print_help()
             return
 
         # Route error messages to application loggers
         try:
-            action(**args)
+            callable_(**kwargs)
 
         except Exception as excep:
             logging.getLogger('file_logger').critical('Application crash', exc_info=excep)

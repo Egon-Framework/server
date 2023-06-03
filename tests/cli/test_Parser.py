@@ -9,24 +9,24 @@ from egon_server.settings import Settings
 class DefaultParser(TestCase):
     """Test the root CLI parser"""
 
-    def test_program_name(self) -> None:
+    def test_application_name(self) -> None:
         """Test the CLI application name is set to ``egon-server``"""
 
         self.assertEqual('egon-server', Parser().prog)
 
-    def test_default_action(self) -> None:
-        """Test the default callable action when parsing no arguments is ``None``"""
+    def test_default_callable(self) -> None:
+        """Test the default callable object returned when parsing no arguments is ``None``"""
 
-        self.assertIsNone(Parser().parse_args([]).action)
+        self.assertIsNone(Parser().parse_args([]).callable)
 
 
 class MigrateSubparser(TestCase):
     """Test the ``migrate`` subparser"""
 
-    def test_action_matches_application(self) -> None:
+    def test_callable_matches_application(self) -> None:
         """Test the subparser is configured to call the correct ``Application`` method"""
 
-        self.assertEqual(Application.migrate_db, Parser().parse_args(['migrate']).action)
+        self.assertEqual(Application.migrate_db, Parser().parse_args(['migrate']).callable)
 
 
 class ServeSubparser(TestCase):
@@ -52,10 +52,10 @@ class ServeSubparser(TestCase):
         self.assertEqual(100, args.port)
         self.assertEqual(99, args.workers)
 
-    def test_action_matches_application(self) -> None:
+    def test_callable_matches_application(self) -> None:
         """Test the subparser is configured to call the correct ``Application`` method"""
 
-        self.assertEqual(Application.serve_api, Parser().parse_args(['serve']).action)
+        self.assertEqual(Application.serve_api, Parser().parse_args(['serve']).callable)
 
 
 class ErrorHandling(TestCase):
@@ -70,6 +70,6 @@ class ErrorHandling(TestCase):
     def test_raised_with_message(self) -> None:
         """Test the exit message is included with raised error"""
 
-        message = 'This is a test'
+        message = 'This is an error'
         with self.assertRaisesRegex(SystemExit, message):
             Parser().error(message)
