@@ -3,9 +3,8 @@
 Order of priority when resolving application settings:
   1. Commandline arguments provided at runtime
   2. Environment variables prefixed by the string ``EGON_``
-  3. Values loaded from a dotenv (.env) file
-  4. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
-  5. Default values defined by the ``Settings`` class
+  3. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
+  4. Default values defined by the ``Settings`` class
 """
 
 from pathlib import Path
@@ -13,8 +12,6 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, Literal
 
 from pydantic import BaseSettings, Field
-
-_SECRETS_DIR = Path('/etc/egon_server/secrets')
 
 
 class Settings(BaseSettings):
@@ -24,13 +21,15 @@ class Settings(BaseSettings):
         """Configure settings parsing options"""
 
         # Only look for secrets if the directory exits - avoids pydantic warnings/errors
-        if _SECRETS_DIR.exists():
-            secrets_dir = _SECRETS_DIR
+        _secrets_dir = Path('/etc/egon_server/secrets')
+        if _secrets_dir.exists():
+            secrets_dir = _secrets_dir
 
         env_prefix = "EGON_"
         case_sensitive = False
         allow_mutation = False
 
+    # Settings for the Uvicorn ASGI server
     server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')
     server_port: int = Field(title='API Server Port', default=5000, description='API server port number')
     server_workers: int = Field(title='Web server workers', default=1, description='Webserver processes to spawn')
