@@ -1,7 +1,7 @@
-"""Parses application settings from external configuration sources.
-
-Order of priority when resolving application settings:
-  1. Commandline arguments provided at runtime
+"""The application settings schema is defined by the ``Settings`` class.
+Settings are loaded at runtime and cached under the ``SETTINGS`` variable
+according to the following priority order:
+  1. Commandline arguments provided at runtime (see the ``cli`` module)
   2. Environment variables prefixed by the string ``EGON_``
   3. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
   4. Default values defined by the ``Settings`` class
