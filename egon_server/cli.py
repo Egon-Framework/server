@@ -31,7 +31,7 @@ class Parser(ArgumentParser):
         """Define the command line interface"""
 
         super().__init__(prog='egon-server', description='Administrative utility for the Egon API server.')
-        self.add_argument('--version', callable='version', version=__version__)
+        self.add_argument('--version', action='version', version=__version__)
         self.set_defaults(callable=None)
         subparsers = self.add_subparsers(parser_class=ArgumentParser, required=False)
 
