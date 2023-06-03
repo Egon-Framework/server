@@ -1,4 +1,4 @@
-"""Migrates database to schema version 0.1."""
+"""Database schema migration for schema version 0.1."""
 
 import sqlalchemy as sa
 from alembic import op
