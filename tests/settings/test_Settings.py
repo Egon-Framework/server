@@ -9,7 +9,7 @@ from egon_server.settings import Settings
 
 
 class Config(TestCase):
-    """Test the lading/modification of applciation settings"""
+    """Test the loading/modification of application settings"""
 
     def setUp(self) -> None:
         """Cache current environmental variables"""
@@ -39,7 +39,7 @@ class Config(TestCase):
 class GetDbUri(TestCase):
     """Test the ``get_db_uri`` method"""
 
-    def test_values_match_settings(self) -> None:
+    def test_returned_values_match_settings(self) -> None:
         """Test URI values match application settings"""
 
         settings = Settings()

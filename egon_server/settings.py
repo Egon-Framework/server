@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     class Config:
         """Configure settings parsing options"""
 
-        # Only look for secrets if the directory exits - avoids pydantic warnings/errors
+        # Only look for secrets if the directory exists - avoids pydantic warnings/errors
         _secrets_dir = Path('/etc/egon_server/secrets')
         if _secrets_dir.exists():
             secrets_dir = _secrets_dir
@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     # Settings for the Uvicorn ASGI server
     server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')
     server_port: int = Field(title='API Server Port', default=5000, description='API server port number')
-    server_workers: int = Field(title='Web server workers', default=1, description='Webserver processes to spawn')
+    server_workers: int = Field(title='Web server workers', default=1, description='Server processes to spawn')
 
     # Settings for the database connection
     db_user: str = Field(title='Database Username', default='egon_user', description='Database username')
