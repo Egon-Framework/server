@@ -1,54 +1,79 @@
-"""The application command line interface."""
+"""The command line interface is implemented in two parts. The ``Parser`` class
+defines the overall interface and handles command line argument parsing. This
+includes CLI defaults, help text, and argument type casting. The ``Application``
+class encapsulates top level application logic and is  responsible for executing
+the instruction set returned by the ``Parser`` class.
 
+The ``Application.execute`` method serves as the default application entrypoint
+when executing the parent package from the command line.
+"""
+
+import logging
 from argparse import ArgumentParser
-from pathlib import Path
 
 import uvicorn
 from alembic import config, command
 
 from . import __version__
 from .api import AppFactory
-from .orm import __db_version__, DBConnection
+from .orm import __db_version__, DBConnection, MIGRATIONS_DIR
 from .settings import Settings
 
+# Load settings from disk/environment and configure logging for the entire package
 SETTINGS = Settings()
-DEFAULT_HOST = SETTINGS.server_host
-DEFAULT_PORT = SETTINGS.server_port
-DEFAULT_WORKERS = SETTINGS.server_workers
-DEFAULT_PROXY = SETTINGS.server_proxy
-MIGRATIONS_DIR = Path(__file__).parent / 'migrations'
+logging.config.dictConfig(SETTINGS.get_logging_config())
 
 
 class Parser(ArgumentParser):
-    """Defines the command line interface and handles command line argument parsing"""
+    """Defines the application command line interface and handles command line argument parsing"""
 
     def __init__(self) -> None:
         """Define the command line interface"""
 
         super().__init__(prog='egon-server', description='Administrative utility for the Egon API server.')
         self.add_argument('--version', action='version', version=__version__)
-        subparsers = self.add_subparsers(parser_class=ArgumentParser, required=True)
+        self.set_defaults(callable=None)
+        subparsers = self.add_subparsers(parser_class=ArgumentParser, required=False)
 
+        # Subparser for database migrations
         migrate = subparsers.add_parser('migrate', description='Migrate the database schema to the latest version.')
-        migrate.set_defaults(action=Application.migrate_db)
+        migrate.set_defaults(callable=Application.migrate_db)
 
+        # Subparser for launching the API server
         serve = subparsers.add_parser('serve', description='Launch a new API server instance.')
-        serve.set_defaults(action=Application.serve_api)
-        serve.add_argument('--host', type=str, default=DEFAULT_HOST, help='the hostname to listen on')
-        serve.add_argument('--port', type=int, default=DEFAULT_PORT, help='the port of the webserver')
-        serve.add_argument('--workers', type=int, default=DEFAULT_WORKERS, help='number of worker processes to spawn')
-        serve.add_argument('--proxy', action='store_true', default=DEFAULT_PROXY,
-                           help='configure the server to run behind a proxy')
+        serve.set_defaults(callable=Application.serve_api)
+        serve.add_argument('--host', type=str, default=SETTINGS.server_host, help='the hostname to listen on')
+        serve.add_argument('--port', type=int, default=SETTINGS.server_port, help='the port to serve on')
+        serve.add_argument('--workers', type=int, default=SETTINGS.server_workers, help='number of workers to spawn')
+
+    def error(self, message: str) -> None:
+        """Exit the parser by raising a ``SystemExit`` error
+
+        This method mimics the parent class behavior except error messages
+        are included in the raised ``SystemExit`` exception. This makes for
+        easier testing/debugging.
+
+        Args:
+            message: The error message
+
+        Raises:
+            SystemExit: Every time the method is run
+        """
+
+        raise SystemExit(message)
 
 
 class Application:
-    """Entry point for instantiating and executing the application"""
+    """Entry point for instantiating and executing API server tasks from the command line"""
 
     app = AppFactory()
 
     @classmethod
     def migrate_db(cls, schema_version: str = __db_version__) -> None:
-        """Migrate the application database to the current schema
+        """Migrate the application database to the given schema version
+
+        Defaults to the schema version expected by the ORM module
+        (``orm.__db_version__``).
 
         Args:
             schema_version: The schema version to migrate to
@@ -66,18 +91,20 @@ class Application:
     @classmethod
     def serve_api(
         cls,
-        host: str = DEFAULT_HOST,
-        port: int = DEFAULT_PORT,
-        workers: int = DEFAULT_WORKERS,
-        proxy: bool = DEFAULT_PROXY
+        host: str = SETTINGS.server_host,
+        port: int = SETTINGS.server_port,
+        workers: int = SETTINGS.server_workers
     ) -> None:
         """Launch the API web server on the given host and port
+
+        Default argument values are set dynamically to reflect the application
+        settings file. See the ``settings`` module for more information on
+        how settings values are resolved.
 
         Args:
             host: the hostname to listen on
             port: the port of the webserver
             workers: Number of worker processes to spawn
-            proxy: Configure the server to run behind a proxy
         """
 
         DBConnection.configure(url=SETTINGS.get_db_uri())
@@ -86,7 +113,6 @@ class Application:
             host=host,
             port=port,
             workers=workers,
-            proxy_headers=proxy,
             log_config=SETTINGS.get_logging_config())
 
     @classmethod
@@ -94,6 +120,17 @@ class Application:
         """Parse command line arguments and run the application"""
 
         parser = Parser()
-        args = vars(parser.parse_args())
-        action = args.pop('action')
-        action(**args)
+        kwargs = vars(parser.parse_args())
+
+        # If CLI is called without any argument, print the help and exit
+        if callable_ := kwargs.pop('callable') is None:
+            parser.print_help()
+            return
+
+        # Route error messages to application loggers
+        try:
+            callable_(**kwargs)
+
+        except Exception as excep:
+            logging.getLogger('file_logger').critical('Application crash', exc_info=excep)
+            logging.getLogger('console_logger').critical(str(excep))

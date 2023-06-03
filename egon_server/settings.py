@@ -34,7 +34,6 @@ class Settings(BaseSettings):
     server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')
     server_port: int = Field(title='API Server Port', default=5000, description='API server port number')
     server_workers: int = Field(title='Web server workers', default=1, description='Webserver processes to spawn')
-    server_proxy: bool = Field(title='Web Server Proxy Mode', default=False, description='Run behind a web proxy')
 
     # Settings for the database connection
     db_user: str = Field(title='Database Username', default='egon_user', description='Database username')
@@ -84,9 +83,14 @@ class Settings(BaseSettings):
                 }
             },
             'loggers': {
+                # Loggers for the Uvicorn ASGI server
                 'uvicorn': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False},
                 'uvicorn.error': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False},
                 'uvicorn.access': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False},
-                'root': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False}
+                # Custom loggers allowing the application logs to specific destinations
+                'console_logger': {'handlers': ['console'], 'level': 0, 'propagate': False},
+                'file_logger': {'handlers': ['log_file'], 'level': 0, 'propagate': False},
+                # The root logger - configured so logs are written to all destinations
+                '': {'handlers': ['console', 'log_file'], 'level': 0, 'propagate': False}
             }
         }

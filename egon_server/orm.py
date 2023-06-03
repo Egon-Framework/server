@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Optional, Callable
 
 from requests import Session
@@ -11,6 +12,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSessio
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 __db_version__ = '0.1'  # Schema version used to track/manage DB migrations
+MIGRATIONS_DIR = Path(__file__).parent / 'migrations'
 
 Base = declarative_base()
 
