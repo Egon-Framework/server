@@ -32,6 +32,7 @@ class Parser(ArgumentParser):
 
         super().__init__(prog='egon-server', description='Administrative utility for the Egon API server.')
         self.add_argument('--version', action='version', version=__version__)
+        self.set_defaults(action=None)
         subparsers = self.add_subparsers(parser_class=ArgumentParser, required=False)
 
         # Subparser for database migrations
@@ -122,7 +123,7 @@ class Application:
         args = vars(parser.parse_args())
 
         # If CLI is called without any argument, print the help and exit
-        if action := args.pop('action', None) is None:
+        if action := args.pop('action') is None:
             parser.print_help()
             return
 
