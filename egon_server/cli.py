@@ -17,11 +17,7 @@ from alembic import config, command
 from . import __version__
 from .api import AppFactory
 from .orm import __db_version__, DBConnection, MIGRATIONS_DIR
-from .settings import Settings
-
-# Load settings from disk/environment and configure logging for the entire package
-SETTINGS = Settings()
-logging.config.dictConfig(SETTINGS.get_logging_config())
+from .settings import SETTINGS
 
 
 class Parser(ArgumentParser):

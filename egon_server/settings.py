@@ -1,11 +1,10 @@
-"""Parses application settings from external configuration sources.
-
-Order of priority when resolving application settings:
-  1. Commandline arguments provided at runtime
+"""The application settings schema is defined by the ``Settings`` class.
+Settings are loaded at runtime and cached under the ``SETTINGS`` variable
+according to the following priority order:
+  1. Commandline arguments provided at runtime (see the ``cli`` module)
   2. Environment variables prefixed by the string ``EGON_``
-  3. Values loaded from a dotenv (.env) file
-  4. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
-  5. Default values defined by the ``Settings`` class
+  3. Values loaded from the secrets' directory ``/etc/egon_server/secrets``
+  4. Default values defined by the ``Settings`` class
 """
 
 from pathlib import Path
@@ -14,8 +13,6 @@ from typing import Optional, Literal
 
 from pydantic import BaseSettings, Field
 
-_SECRETS_DIR = Path('/etc/egon_server/secrets')
-
 
 class Settings(BaseSettings):
     """Defines the application settings schema"""
@@ -23,17 +20,19 @@ class Settings(BaseSettings):
     class Config:
         """Configure settings parsing options"""
 
-        # Only look for secrets if the directory exits - avoids pydantic warnings/errors
-        if _SECRETS_DIR.exists():
-            secrets_dir = _SECRETS_DIR
+        # Only look for secrets if the directory exists - avoids pydantic warnings/errors
+        _secrets_dir = Path('/etc/egon_server/secrets')
+        if _secrets_dir.exists():
+            secrets_dir = _secrets_dir
 
         env_prefix = "EGON_"
         case_sensitive = False
         allow_mutation = False
 
+    # Settings for the Uvicorn ASGI server
     server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')
     server_port: int = Field(title='API Server Port', default=5000, description='API server port number')
-    server_workers: int = Field(title='Web server workers', default=1, description='Webserver processes to spawn')
+    server_workers: int = Field(title='Web server workers', default=1, description='Server processes to spawn')
 
     # Settings for the database connection
     db_user: str = Field(title='Database Username', default='egon_user', description='Database username')
@@ -87,10 +86,16 @@ class Settings(BaseSettings):
                 'uvicorn': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False},
                 'uvicorn.error': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False},
                 'uvicorn.access': {'handlers': ['console', 'log_file'], 'level': 'INFO', 'propagate': False},
+
                 # Custom loggers allowing the application logs to specific destinations
                 'console_logger': {'handlers': ['console'], 'level': 0, 'propagate': False},
                 'file_logger': {'handlers': ['log_file'], 'level': 0, 'propagate': False},
+
                 # The root logger - configured so logs are written to all destinations
                 '': {'handlers': ['console', 'log_file'], 'level': 0, 'propagate': False}
             }
         }
+
+
+# Load settings from disk/environment
+SETTINGS = Settings()
