@@ -7,18 +7,20 @@ according to the following priority order:
   4. Default values defined by the ``Settings`` class
 """
 
+import logging
 from pathlib import Path
+from string import whitespace
 from tempfile import NamedTemporaryFile
 from typing import Optional, Literal
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 
 class Settings(BaseSettings):
     """Defines the application settings schema"""
 
     class Config:
-        """Configure settings parsing options"""
+        """Configure parsing options for application settings"""
 
         # Only look for secrets if the directory exists - avoids pydantic warnings/errors
         _secrets_dir = Path('/etc/egon_server/secrets')
@@ -28,6 +30,9 @@ class Settings(BaseSettings):
         env_prefix = "EGON_"
         case_sensitive = False
         allow_mutation = False
+
+    # Security settings
+    secret_key: str = Field(title='Secret Key', default='secret', description='Secret key used for cryptographic signing')
 
     # Settings for the Uvicorn ASGI server
     server_host: str = Field(title='API Server Host', default='localhost', description='API server host address')
@@ -47,6 +52,17 @@ class Settings(BaseSettings):
     log_rotations: int = Field(title='Log rotations', default=5, description='Total log file rotations to keep')
     log_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = Field(
         title='Logging Level', default='INFO', description='Logging threshold for recording to the log file')
+
+    @validator('secret_key')
+    def _validate_secret_key(cls, secret_key: str) -> str:
+
+        if any(char in secret_key for char in whitespace):
+            raise ValueError('Secret key cannot contain whitespace')
+
+        if len(secret_key) < 12:
+            logging.warning('Secret key is less than 12 characters long. Consider increasing the key length.')
+
+        return secret_key
 
     def get_db_uri(self) -> str:
         """Return the fully qualified database URI"""
