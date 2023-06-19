@@ -22,6 +22,13 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'))
 
     op.create_table(
+        'client',
+        sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column('name', sa.String(), nullable=False, unique=True, index=True),
+        sa.Column('password', sa.String(), nullable=False),
+        sa.PrimaryKeyConstraint('id'))
+
+    op.create_table(
         'pipeline',
         sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
         sa.Column('egon_id', sa.String(), nullable=False),

@@ -49,6 +49,23 @@ class DBConnection:
 
 
 @dataclass
+class Client(Base):
+    """Client machine authentication data
+
+    Table Fields:
+      - id      (Integer): Primary key for this table
+      - name     (String): Client name
+      - password (String): Hashed client passwrd
+    """
+
+    __tablename__ = 'client'
+
+    id: int = Column(Integer, primary_key=True, autoincrement=True)
+    name: str = Column(String, nullable=False, unique=True, index=True)
+    password: str = Column(String, nullable=False)
+
+
+@dataclass
 class Pipeline(Base):
     """Metadata table for Egon pipelines
 

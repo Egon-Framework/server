@@ -8,13 +8,14 @@ The ``Application.execute`` method serves as the default application entrypoint
 when executing the parent package from the command line.
 """
 
+import asyncio
 import logging
 from argparse import ArgumentParser
 
 import uvicorn
 from alembic import config, command
 
-from . import __version__
+from . import __version__, auth
 from .api import AppFactory
 from .orm import __db_version__, DBConnection, MIGRATIONS_DIR
 from .settings import SETTINGS
@@ -38,9 +39,19 @@ class Parser(ArgumentParser):
         # Subparser for launching the API server
         serve = subparsers.add_parser('serve', description='Launch a new API server instance.')
         serve.set_defaults(callable=Application.serve_api)
-        serve.add_argument('--host', type=str, default=SETTINGS.server_host, help='the hostname to listen on')
+        serve.add_argument('-host', type=str, default=SETTINGS.server_host, help='the hostname to listen on')
         serve.add_argument('--port', type=int, default=SETTINGS.server_port, help='the port to serve on')
         serve.add_argument('--workers', type=int, default=SETTINGS.server_workers, help='number of workers to spawn')
+
+        register = subparsers.add_parser('register_client', description='Register authentication credentials for a new client')
+        register.set_defaults(callable=Application.register_client)
+        register.add_argument('name', type=str, help='the user/client name')
+        register.add_argument('password', type=str, help='the user/client password')
+        register.add_argument('--overwrite', action='store_true', help='Override existing credentials')
+
+        delete = subparsers.add_parser('delete_client', description='Delete credentials for a given user/client')
+        delete.set_defaults(callable=Application.delete_client)
+        delete.add_argument('name', type=str, help='the user/client name')
 
     def error(self, message: str) -> None:
         """Exit the parser by raising a ``SystemExit`` error
@@ -63,6 +74,30 @@ class Application:
     """Entry point for instantiating and executing API server tasks from the command line"""
 
     app = AppFactory()
+
+    @staticmethod
+    def register_client(name: str, password: str, overwrite: bool = False) -> None:
+        """Create/update user credentials in the application database
+
+        Args:
+            name: The user/client name
+            password: The user/client password
+            overwrite: Allow existing credentials to be overwritten
+        """
+
+        DBConnection.configure(url=SETTINGS.get_db_uri())
+        asyncio.run(auth.register_credential(name, password, overwrite))
+
+    @staticmethod
+    def delete_client(name: str) -> None:
+        """Delete user credentials frm the application database
+
+        Args:
+            name: The user/client name
+        """
+
+        DBConnection.configure(url=SETTINGS.get_db_uri())
+        asyncio.run(auth.delete_credential(name))
 
     @classmethod
     def migrate_db(cls, schema_version: str = __db_version__) -> None:
@@ -119,7 +154,7 @@ class Application:
         kwargs = vars(parser.parse_args())
 
         # If CLI is called without any argument, print the help and exit
-        if callable_ := kwargs.pop('callable') is None:
+        if (callable_ := kwargs.pop('callable')) is None:
             parser.print_help()
             return
 

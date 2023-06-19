@@ -53,17 +53,6 @@ class Settings(BaseSettings):
     log_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = Field(
         title='Logging Level', default='INFO', description='Logging threshold for recording to the log file')
 
-    @validator('secret_key')
-    def _validate_secret_key(cls, secret_key: str) -> str:
-
-        if any(char in secret_key for char in whitespace):
-            raise ValueError('Secret key cannot contain whitespace')
-
-        if len(secret_key) < 12:
-            logging.warning('Secret key is less than 12 characters long. Consider increasing the key length.')
-
-        return secret_key
-
     def get_db_uri(self) -> str:
         """Return the fully qualified database URI"""
 
