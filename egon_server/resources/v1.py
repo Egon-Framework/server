@@ -7,7 +7,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi_restful import Resource
 from sqlalchemy import select
 
-from egon_server import orm
+from .. import orm
 
 __api_version__ = '1.0'
 
