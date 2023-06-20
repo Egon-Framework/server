@@ -49,3 +49,23 @@ async def delete_credential(name: str) -> None:
     async with orm.DBConnection.session_maker() as session:
         await session.execute(delete(orm.Client).where(orm.Client.name == name))
         await session.commit()
+
+
+async def verify_credential(name: str, password: str) -> bool:
+    """Verify the given user credentials
+
+    Args:
+        name: The user/client name
+        password: The user/client password
+
+    Returns:
+        Whether the credentials are valid
+    """
+
+    salted = password + Settings().secret_key
+    hashed = sha256(salted.encode()).hexdigest()
+
+    async with orm.DBConnection.session_maker() as session:
+        query = select(orm.Client).where(orm.Client.name == name)
+        db_record: orm.Client = await session.execute(query).first()
+        return (db_record is not None) and db_record.password == hashed
