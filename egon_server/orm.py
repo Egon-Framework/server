@@ -7,7 +7,6 @@ from typing import Optional, Callable
 
 from requests import Session
 from sqlalchemy import Column, Integer, String, DateTime, func
-from sqlalchemy import Connection
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 
@@ -27,7 +26,6 @@ class DBConnection:
     """
 
     engine: Optional[AsyncEngine] = None
-    connection: Optional[Connection] = None
     session_maker: Optional[Callable[[], Session]] = None
 
     @classmethod
@@ -40,10 +38,6 @@ class DBConnection:
             url: URL information for the application database
         """
 
-        if cls.connection:
-            cls.connection.close()
-
-        cls.connection = None
         cls.engine = create_async_engine(url)
         cls.session_maker = sessionmaker(cls.engine, class_=AsyncSession)
 
